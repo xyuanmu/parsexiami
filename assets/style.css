@@ -1,0 +1,43 @@
+body{color:#333;font-family:'segoe ui',Arial,sans-serif}
+a,a:link,#footer{color:#03699E;text-decoration:none}
+a:hover{color:#0EA95D}
+a:active{color:#065177}
+h1{text-align:center}
+form{text-align:center;margin:30px 0 40px}
+#page{width:90%;max-width:1280px;margin:10px auto 0;padding:20px 0 40px}
+#div{width:100%;float:left}
+#label{display:block;margin-right:80px}
+#submit{width:80px;height:48px;font-size:18px;float:right;margin-left:-80px;cursor:pointer;color:#fff;background:#41A1FF;outline:0;border:0}
+#submit:hover{background:#1D7EDB}
+#submit:active{color:#eee;background:#0B5CA9}
+.input{width:100%;height:48px;font-size:18px;color:#888;background:#f2f2f2;border:0;padding:0 10px;outline:0;text-align:center;box-sizing:border-box}
+.input,#submit{transition:color,background .2s ease-out}
+.input:focus{color:#000;background:#C7EAEA}
+.input-left{width:49%;float:left;margin-right:2%}
+.input-right{width:49%}
+#audio{display:block;margin:0 auto}
+#info{font-family:monaco,consolas;font-size:13px;background:#f8f8f8;padding:10px;border:1px solid #e3e3e3;overflow-x:auto;border-radius:4px;display:none}
+#error{width:240px;max-width:100%;margin:60px auto;color:#fff;background:#FA3F71;text-align:center;padding:15px 20px;border-radius:4px;box-sizing:border-box;display:none}
+#advanced{margin-top:20px;display:none}
+#song{width:3em;float:left;margin-right:-3em}
+#case{width:100%;float:right}
+#case-label{margin-left:3em;display:block}
+#src{max-width:100%;color:#E47;background:#f8f8f8;border:0;outline:0;font-family:monaco,consolas}
+#footer{width:480px;position:fixed;left:50%;bottom:0;margin-left:-240px;font-size:14px;text-align:center;display:inline-block;border:1px solid #ddd;border-bottom:0;border-radius:4px 4px 0 0;box-sizing:border-box}
+#footer .item{width:86px;line-height:36px;background:#f8f8f8;display:inline-block}
+#footer .item-left,#footer .item-center{border-right:1px solid #ddd}
+#footer .item-center{width:304px}
+#help{height:100%;position:fixed;top:0;left:0;padding:40px 10%;font-size:14px;background:#fff;overflow:auto;box-sizing:border-box;display:none}
+.clear:after{content:'';line-height:0;display:table;clear:both}
+@media screen and (max-width:1080px){
+	.input,#submit{font-size:16px}
+	#info{font-size:12px}
+}
+@media screen and (max-width:540px){
+	h1{font-size:22px}
+	.input,#submit{height:36px;font-size:14px}
+	#label{margin-right:50px}
+	#submit{width:50px;height:36px;margin-left:-50px}
+	#footer{width:175px;margin-left:-86px}
+	#footer .item-center{display:none}
+}
