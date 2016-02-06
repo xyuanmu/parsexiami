@@ -16,56 +16,53 @@ function get_info($sid, $type) {
 	$result = curl_http($url, $useCookie);
 	$data = array();
 	if ($result) {
-		$result = str_replace(array('<![CDATA[', ']]>'), array('', ''), $result);
-		$xml = simplexml_load_string($result);
+		$res = str_replace(array('<![CDATA[', ']]>'), array('', ''), $result);
+		if ($res==$result) {
+			$data['info'] = '请使用国内代理！';
+			return $data;
+		}
+		$xml = simplexml_load_string($res);
 		$arr = json_decode(json_encode($xml), true);
 		$html = '';
 		$track = $arr['trackList']['track'];
 		$close = '<div class="close" title="关闭">×</div>';
 		if ($type==0) {
-			$html = '<div id="item-'.date("Gis").'" class="info-item clear"><img src="'.$track['pic'].'"><div><strong>标题：</strong>'.$track['title'].'</div><div><strong>艺人：</strong>'._a($track['artist'], $track['artist_id'], 'artist').'</div>';
-			if (is_string($track['album_name']))
-				$html.= '<div><strong>专辑：</strong>'._a($track['album_name'], $track['album_id'], 'album').'</div>';
-			if (is_string($track['lyric']))
-				$html.= '<div><strong>歌词：</strong>'.$track['lyric'].'</div>';
 			$song = 'http://www.xiami.com/song/gethqsong/sid/'.$sid;
 			$json = curl_http($song, 1);
-			if ($json) {
-				$location = json_decode($json)->location;
+			$location = $json ? json_decode($json)->location : '';
+			if ($location) {
 				$data['src'] = get_location($location);
-				$html.= '<strong id="song">歌曲：</strong><div id="case"><label id="case-label"><input id="src" size="124" onmouseover="this.select()" value="'.$data['src'].'"></label></div>';
+				$data['status'] = 1;
+			} else {
+					$data['info'] = '获取歌曲链接失败！';
+					return $data;
 			}
+			$html = '<div id="item-'.date("Gis").'" class="info-item"><img src="'.$track['pic'].'"><div><strong>标题：</strong>'.$track['title'].'</div><div><strong>艺人：</strong>'._a($track['artist'], $track['artist_id'], 'artist').'</div>';
+			$html.= is_string($track['album_name']) ? '<div><strong>专辑：</strong>'._a($track['album_name'], $track['album_id'], 'album').'</div>' : '';
+			$html.= is_string($track['lyric']) ? '<div><strong>歌词：</strong>'.$track['lyric'].'</div>' : '';
+			$html.= '<strong id="song">歌曲：</strong><div id="case"><label id="case-label"><input id="src" onmouseover="this.select()" value="'.$data['src'].'"></label></div>';
 			$html.= $close.'</div>';
 		}
-		elseif ($type==1) {
-			$html = '<div id="item-'.date("Gis").'" class="info-item"><img src="'.$track[0]['pic'].'"><div><strong>专辑：</strong>'.$track[0]['album_name'].'</div><div><strong>艺人：</strong>'._a($track[0]['artist'], $track[0]['artist_id'], 'artist').'</div><ol>';
-			foreach ($track as $item) {
-				$html.= '<li>'._a($item['title'], $item['song_id'], 'song').'</li>';
-			}
-			$html.= '</ol>'.$close.'</div>';
-		}
-		elseif ($type==2) {
-			$html = '<div id="item-'.date("Gis").'" class="info-item"><div><strong>'.$track[0]['artist'].'的热门曲目：</strong></div><ol>';
+		else {
+			$title = $type==3 ? '精选集曲目：' : '今日歌单曲目：';
+			$html = '<div id="item-'.date("Gis").'" class="info-item">';
+			$html.= $type==1 ? '<img src="'.$track[0]['pic'].'"><div><strong>专辑：</strong>'.$track[0]['album_name'].'</div><div><strong>艺人：</strong>'._a($track[0]['artist'], $track[0]['artist_id'], 'artist') : '';
+			$html.= $type==2 ? '<div><strong>'.$track[0]['artist'].'的热门曲目：</strong>' : '';
+			$html.= $type==3 || $type==9 ? '<div><strong>'.$title.'</strong>' : '';
+			$html.= '</div><ol>';
 			foreach ($track as $item) {
 				$html.= '<li>'._a($item['title'], $item['song_id'], 'song');
-				if (is_string($item['album_name']))
+				$html.= $type==3 || $type==9 ? ' - '._a($item['artist'], $item['artist_id'], 'artist') : '';
+				if (is_string($item['album_name']) && $type!=1)
 					$html.= ' - 《'._a($item['album_name'], $item['album_id'], 'album').'》';
 				$html.= '</li>';
 			}
 			$html.= '</ol>'.$close.'</div>';
-		}
-		elseif ($type==3 || $type==9) {
-			$title = $type==3 ? '精选集曲目：' : '今日歌单曲目：';
-			$html = '<div id="item-'.date("Gis").'" class="info-item"><div><strong>'.$title.'</strong></div><ol>';
-			foreach ($track as $item) {
-				$html.= '<li>'._a($item['title'], $item['song_id'], 'song').' - '._a($item['artist'], $item['artist_id'], 'artist');
-				if (is_string($item['album_name']))
-					$html.= ' - 《'._a($item['album_name'], $item['album_id'], 'album').'》';
-				$html.= '</li>';
-			}
-			$html.= '</ol>'.$close.'</div>';
+			$data['status'] = 1;
 		}
 		$data['info'] = htmlspecialchars($html);
+	} else {
+		$data['info'] = '解析失败！';
 	}
 	return $data;
 }
@@ -139,7 +136,6 @@ if (isset($_POST['url']) && $_POST['url']) {
 		$song_id = $matches[1];
 		$type = 0;
 		$data = array_merge($data, get_info($song_id, $type));
-		if (isset($data['src'])) $data['status'] = 1;
 	}
 	else {
 		if (preg_match('#/album/(\d+)(\?*|)#i', $url, $matches)) {
@@ -159,7 +155,6 @@ if (isset($_POST['url']) && $_POST['url']) {
 			$type = 9;
 		}
 		$data = array_merge($data, get_info($sid, $type));
-		if (isset($data['info'])) $data['status'] = 1;
 	}
 }
 die(json_encode($data));
@@ -201,9 +196,9 @@ echo '<ol><li><p><strong>支持链接，链接后面的</strong> ?spm=xxx <stron
 			<input class="input input-right" name="proxy" type="text" value="" placeholder="example: 127.0.0.1:8087">
 		</div>
 	</form>
+	<div id="error"></div>
 	<audio id="audio" src="" controls style="display:none"></audio>
 	<pre id="info"></pre>
-	<div id="error">解析失败！</div>
 </div>
 <div id="help"></div>
 <div id="footer">

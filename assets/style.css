@@ -25,7 +25,7 @@ form{text-align:center;margin:30px 0 40px}
 #song{width:3em;float:left;margin-right:-3em}
 #case{width:100%;float:right}
 #case-label{margin-left:3em;display:block}
-#src{max-width:100%;color:#E47;background:#f8f8f8;border:0;outline:0;font-family:monaco,consolas}
+#src{width:100%;color:#E47;background:#f8f8f8;border:0;outline:0;font-family:monaco,consolas}
 #footer{width:480px;position:fixed;left:50%;bottom:0;margin-left:-240px;font-size:14px;text-align:center;display:inline-block;border:1px solid #ddd;border-bottom:0;border-radius:4px 4px 0 0;box-sizing:border-box}
 #footer .item{width:86px;line-height:36px;background:#f8f8f8;display:inline-block}
 #footer .item-left,#footer .item-center{border-right:1px solid #ddd}
