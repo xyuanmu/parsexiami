@@ -3,6 +3,7 @@ a,a:link,#footer{color:#03699E;text-decoration:none}
 a:hover{color:#0EA95D}
 a:active{color:#065177}
 h1{text-align:center}
+hr{border: 0;border-top: 1px solid #ddd;border-bottom: 1px solid #fff;margin: 10px 0!important}
 form{text-align:center;margin:30px 0 40px}
 #page{width:90%;max-width:1280px;margin:10px auto 0;padding:20px 0 40px}
 #div{width:100%;float:left}
@@ -16,7 +17,9 @@ form{text-align:center;margin:30px 0 40px}
 .input-left{width:49%;float:left;margin-right:2%}
 .input-right{width:49%}
 #audio{display:block;margin:0 auto}
-#info{font-family:monaco,consolas;font-size:13px;background:#f8f8f8;padding:10px;border:1px solid #e3e3e3;overflow-x:auto;border-radius:4px;display:none}
+#info{font-family:monaco,consolas;font-size:13px;display:none}
+#info .info-item{background:#f8f8f8;padding:10px;margin-bottom:20px;position:relative;border:1px solid #e3e3e3;overflow-x:auto;border-radius:4px}
+#info .close{width:20px;height:20px;text-align:center;color:#fff;background:#FA4956;position:absolute;top:5px;right:5px;border-radius:4px;cursor:pointer}
 #error{width:240px;max-width:100%;margin:60px auto;color:#fff;background:#FA3F71;text-align:center;padding:15px 20px;border-radius:4px;box-sizing:border-box;display:none}
 #advanced{margin-top:20px;display:none}
 #song{width:3em;float:left;margin-right:-3em}
