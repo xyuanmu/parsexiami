@@ -28,9 +28,11 @@ function get_info($sid, $type) {
 		$track = $arr['trackList']['track'];
 		$close = '<div class="close" title="关闭">×</div>';
 		if ($type==0) {
-			$song = 'http://www.xiami.com/song/gethqsong/sid/'.$sid;
-			$json = curl_http($song, 1);
-			$location = $json ? json_decode($json)->location : '';
+			$song = 'http://www.xiami.com/song/playlist/id/'.$sid.'/object_name/default/object_id/0';
+			$song_data = curl_http($song, 0);
+			$song_xml = simplexml_load_string($song_data);
+			$json = json_decode(json_encode($song_xml), true);
+			$location = $json ? $json['trackList']['track']['location'] : '';
 			if ($location) {
 				$data['src'] = get_location($location);
 				$data['status'] = 1;
@@ -168,7 +170,7 @@ die('<img src="assets/Chrome-Cookie.gif">');
 endif;
 
 if (isset($_GET['help'])):
-echo '<ol><li><p><strong>支持链接，链接后面的</strong> ?spm=xxx <strong>可有可无：</strong></p><ul><li>单曲：<a href="http://www.xiami.com/song/2085857" target=_blank>http://www.xiami.com<strong>/song/2085857</strong></a></li><li>艺人：<a href="http://www.xiami.com/artist/23503" target=_blank>http://www.xiami.com<strong>/artist/23503</strong></a></li><li>专辑：<a href="http://www.xiami.com/album/168931" target=_blank>http://www.xiami.com<strong>/album/168931</strong></a></li><li>精选集：<a href="http://www.xiami.com/collect/42563832" target=_blank>http://www.xiami.com<strong>/collect/42563832</strong></a></li><li>DEMO：<a href="http://i.xiami.com/zhangchao/demo/1775392054" target=_blank>http://i.xiami.com/zhangchao<strong>/demo/1775392054</strong></a></li><li>今日歌单（需要cookie）：<a href="http://www.xiami.com/play?ids=/song/playlist/id/1/type/9" target=_blank>http://www.xiami.com/play?ids=<strong>/song/playlist/id/1/type/9</strong></a></li></ul></li><li><p><strong>高级选项：</strong></p><ul><li>在服务器使用：首先使用国内HTTP代理登录虾米，登录后获取 Cookie: member_auth（<a href="?cookie" target=_blank>获取方法</a>），打开服务器虾米解析页面，点开高级选项，左边输入member_auth，右边输入代理IP进行解析。</li><li>在本地使用：本地登录虾米，本地搭建PHP环境，打开虾米解析页面，点开高级选项，输入 member_auth 并进行解析。</li></ul></li><li><p><strong>注意事项：</strong></p><ul><li>本工具所有代码开源，不会收集用户信息，若不放心可以不输入 Cookie ，或者本地搭建使用。</li><li>今日歌单需要用户自己的member_auth才能解析到，否则解析默认歌单。</li><li>只有member_auth和登录IP同时匹配才能解析到高品质音乐，部分音乐只有普通品质。</li><li>经测试，只要匹配member_auth和登录IP，普通会员也能解析高品质，不信本地测试就知道了。</li></ul></li><li><p><strong>GitHub项目地址：</strong><a href="https://github.com/xyuanmu/parsexiami" target=_blank>https://github.com/xyuanmu/parsexiami</a></p></li></ol>';
+echo '<ol><li><p><strong>支持链接，链接后面的</strong> ?spm=xxx <strong>可有可无：</strong></p><ul><li>单曲：<a href="http://www.xiami.com/song/2085857" target=_blank>http://www.xiami.com<strong>/song/2085857</strong></a></li><li>艺人：<a href="http://www.xiami.com/artist/23503" target=_blank>http://www.xiami.com<strong>/artist/23503</strong></a>(暂时失效)</li><li>专辑：<a href="http://www.xiami.com/album/168931" target=_blank>http://www.xiami.com<strong>/album/168931</strong></a></li><li>精选集：<a href="http://www.xiami.com/collect/42563832" target=_blank>http://www.xiami.com<strong>/collect/42563832</strong></a></li><li>DEMO：<a href="http://i.xiami.com/zhangchao/demo/1775392054" target=_blank>http://i.xiami.com/zhangchao<strong>/demo/1775392054</strong></a></li><li>今日歌单（需要cookie）：<a href="http://www.xiami.com/play?ids=/song/playlist/id/1/type/9" target=_blank>http://www.xiami.com/play?ids=<strong>/song/playlist/id/1/type/9</strong></a></li></ul></li><li><p><strong>高级选项：</strong></p><ul><li>此功能一般无需使用，解析今日歌单或者国外服务器解析失败时使用。</li><li>使用Cookie：首先登录虾米，登录后获取 Cookie: member_auth（<a href="?cookie" target=_blank>获取方法</a>），打开虾米解析页面，点开高级选项，左边输入member_auth，进行解析。</li><li>使用HTTP代理：如果服务器不在国内有可能会解析失败，在高级选项右边输入国内代理IP进行解析。</li></ul></li><li><p><strong>注意事项：</strong></p><ul><li>本工具所有代码开源，不会收集用户信息，若不放心可以不输入 Cookie ，或者本地搭建使用。</li><li>今日歌单需要用户自己的member_auth才能解析到，否则解析默认歌单。</li></ul></li><li><p><strong>GitHub项目地址：</strong><a href="https://github.com/xyuanmu/parsexiami" target=_blank>https://github.com/xyuanmu/parsexiami</a></p></li></ol>';
 ; else :
 ?>
 <!DOCTYPE html>
