@@ -21,6 +21,7 @@ function get_info($sid, $type) {
 			$data['info'] = '请使用国内代理！';
 			return $data;
 		}
+		$res = preg_replace('/&(?!#?[a-z0-9]+;)/', '&amp;', $res);
 		$xml = simplexml_load_string($res);
 		$arr = json_decode(json_encode($xml), true);
 		$html = '';
@@ -37,7 +38,7 @@ function get_info($sid, $type) {
 					$data['info'] = '获取歌曲链接失败！';
 					return $data;
 			}
-			$html = '<div id="item-'.date("Gis").'" class="info-item"><img src="'.$track['pic'].'"><div><strong>标题：</strong>'.$track['title'].'</div><div><strong>艺人：</strong>'._a($track['artist'], $track['artist_id'], 'artist').'</div>';
+			$html = '<div class="info-item"><img src="'.$track['pic'].'"><div><strong>标题：</strong>'.$track['songName'].'</div><div><strong>艺人：</strong>'._a($track['artist'], $track['artist_id'], 'artist').'</div>';
 			$html.= is_string($track['album_name']) ? '<div><strong>专辑：</strong>'._a($track['album_name'], $track['album_id'], 'album').'</div>' : '';
 			$html.= is_string($track['lyric']) ? '<div><strong>歌词：</strong>'.$track['lyric'].'</div>' : '';
 			$html.= '<strong id="song">歌曲：</strong><div id="case"><label id="case-label"><input id="src" onmouseover="this.select()" value="'.$data['src'].'"></label></div>';
@@ -45,13 +46,13 @@ function get_info($sid, $type) {
 		}
 		else {
 			$title = $type==3 ? '精选集曲目：' : '今日歌单曲目：';
-			$html = '<div id="item-'.date("Gis").'" class="info-item">';
+			$html = '<div class="info-item">';
 			$html.= $type==1 ? '<img src="'.$track[0]['pic'].'"><div><strong>专辑：</strong>'.$track[0]['album_name'].'</div><div><strong>艺人：</strong>'._a($track[0]['artist'], $track[0]['artist_id'], 'artist') : '';
 			$html.= $type==2 ? '<div><strong>'.$track[0]['artist'].'的热门曲目：</strong>' : '';
 			$html.= $type==3 || $type==9 ? '<div><strong>'.$title.'</strong>' : '';
 			$html.= '</div><ol>';
 			foreach ($track as $item) {
-				$html.= '<li>'._a($item['title'], $item['song_id'], 'song');
+				$html.= '<li>'._a($item['songName'], $item['song_id'], 'song');
 				$html.= $type==3 || $type==9 ? ' - '._a($item['artist'], $item['artist_id'], 'artist') : '';
 				if (is_string($item['album_name']) && $type!=1)
 					$html.= ' - 《'._a($item['album_name'], $item['album_id'], 'album').'》';
