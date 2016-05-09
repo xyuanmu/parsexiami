@@ -56,7 +56,7 @@ function get_info($sid, $type) {
 			foreach ($track as $item) {
 				$html.= '<li>'._a($item['songName'], $item['song_id'], 'song');
 				$html.= $type==3 || $type==9 ? ' - '._a($item['artist'], $item['artist_id'], 'artist') : '';
-				if (is_string($item['album_name']) && $type!=1)
+				if ($type!=1)
 					$html.= ' - 《'._a($item['album_name'], $item['album_id'], 'album').'》';
 				$html.= '</li>';
 			}
@@ -97,6 +97,7 @@ function curl_http($url, $useCookie){
 }
 
 function _a($a, $id, $l) {
+	if(!is_string($a)) return;
 	$_a = '<a href="javascript:void(0)" onclick="setinput(\'/'.$l.'/'.$id.'\')">'.$a.'</a>';
 	return $_a;
 }
