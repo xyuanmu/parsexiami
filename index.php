@@ -11,10 +11,16 @@ $ProxyDefault = "";
 */
 
 function get_info($sid, $type) {
-	if (!preg_match("/\d{8}/", $sid) && $type==0) {
-		$url = "http://www.xiami.com/song/".$sid;
-		$pageindex = curl_http($url, 0);
-		if(preg_match("#id/(\d{10})#", $pageindex, $matches)) $sid = $matches[1];
+	if ($sid!=1) {
+		$info = explode("/", $sid);
+		if (!preg_match("/[a-zA-Z]/", $info[1])) {
+			$sid = $info[1];
+		} else {
+			$url = "http://www.xiami.com/".$sid;
+			$pageindex = curl_http($url, 0);
+			preg_match("#link rel=\"canonical\" href=\"http://www.xiami.com/\w+/(\d+)\"#", $pageindex, $matches);
+			if($matches) $sid = $matches[1];
+		}
 	}
 	$url = 'http://www.xiami.com/song/playlist/id/'.$sid.'/type/'.$type;
 	$useCookie = $type==9 ? 1 : null;
@@ -139,30 +145,27 @@ $data['status'] = 0;
 
 if (isset($_POST['url']) && $_POST['url']) {
 	$url = $_POST['url'];
-	if (preg_match('#/song/([\d\w]+)(\?*|)#i', $url, $matches) || preg_match('#/demo/(\d+)(\?*|)#i', $url, $matches)) {
-		$song_id = $matches[1];
+	if (preg_match('#/song/playlist/id/1/type/9#i', $url)) {
+		$sid = 1;
+		$type = 9;
+	}
+	elseif (preg_match('#/(song/[\da-zA-Z]+)(\?*|)#i', $url, $matches) || preg_match('#/(demo/[\da-zA-Z]+)(\?*|)#i', $url, $matches)) {
+		$sid = $matches[1];
 		$type = 0;
-		$data = array_merge($data, get_info($song_id, $type));
 	}
-	else {
-		if (preg_match('#/album/(\d+)(\?*|)#i', $url, $matches)) {
-			$sid = $matches[1];
-			$type = 1;
-		}
-		elseif (preg_match('#/artist/(\d+)(\?*|)#i', $url, $matches)) {
-			$sid = $matches[1];
-			$type = 2;
-		}
-		elseif (preg_match('#/showcollect/id/(\d+)(\?*|)#i', $url, $matches) || preg_match('#/collect/(\d+)(\?*|)#i', $url, $matches)) {
-			$sid = $matches[1];
-			$type = 3;
-		}
-		elseif (preg_match('#/song/playlist/id/1/type/9#i', $url, $matches)) {
-			$sid = 1;
-			$type = 9;
-		}
-		$data = array_merge($data, get_info($sid, $type));
+	elseif (preg_match('#/(album/[\da-zA-Z]+)(\?*|)#i', $url, $matches)) {
+		$sid = $matches[1];
+		$type = 1;
 	}
+	elseif (preg_match('#/(artist/[\da-zA-Z]+)(\?*|)#i', $url, $matches)) {
+		$sid = $matches[1];
+		$type = 2;
+	}
+	elseif (preg_match('#/(collect/[\da-zA-Z]+)(\?*|)#i', $url, $matches)) {
+		$sid = $matches[1];
+		$type = 3;
+	}
+	$data = array_merge($data, get_info($sid, $type));
 }
 die(json_encode($data));
 
