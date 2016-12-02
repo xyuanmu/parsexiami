@@ -11,6 +11,11 @@ $ProxyDefault = "";
 */
 
 function get_info($sid, $type) {
+	if (!preg_match("/\d{8}/", $sid) && $type==0) {
+		$url = "http://www.xiami.com/song/".$sid;
+		$pageindex = curl_http($url, 0);
+		if(preg_match("#id/(\d{10})#", $pageindex, $matches)) $sid = $matches[1];
+	}
 	$url = 'http://www.xiami.com/song/playlist/id/'.$sid.'/type/'.$type;
 	$useCookie = $type==9 ? 1 : null;
 	$result = curl_http($url, $useCookie);
@@ -31,7 +36,6 @@ function get_info($sid, $type) {
 			$song = 'http://www.xiami.com/song/gethqsong/sid/'.$sid;
 			$json = curl_http($song, 1);
 			$location = $json ? json_decode($json)->location : '';
-			$location = $json ? $json['trackList']['track']['location'] : '';
 			if ($location) {
 				$data['src'] = get_location($location);
 				$data['status'] = 1;
@@ -75,7 +79,7 @@ function curl_http($url, $useCookie){
 		global $CookieDefault;
 		$cookie = $CookieDefault;
 	}
-	if (!preg_match('/member_auth=/i', $cookie, $matches)) $cookie = 'member_auth='.$cookie;
+	if (!preg_match('/member_auth=/i', $cookie)) $cookie = 'member_auth='.$cookie;
 	global $ProxyDefault;
 	$proxy = $_POST['proxy'] ? $_POST['proxy'] : $ProxyDefault;
 	$ch = curl_init();
@@ -135,7 +139,7 @@ $data['status'] = 0;
 
 if (isset($_POST['url']) && $_POST['url']) {
 	$url = $_POST['url'];
-	if (preg_match('#/song/(\d+)(\?*|)#i', $url, $matches) || preg_match('#/demo/(\d+)(\?*|)#i', $url, $matches)) {
+	if (preg_match('#/song/([\d\w]+)(\?*|)#i', $url, $matches) || preg_match('#/demo/(\d+)(\?*|)#i', $url, $matches)) {
 		$song_id = $matches[1];
 		$type = 0;
 		$data = array_merge($data, get_info($song_id, $type));
