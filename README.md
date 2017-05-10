@@ -6,15 +6,15 @@
     *   艺人：[http://www.**xiami.com/artist/23503**](http://www.xiami.com/artist/23503)
     *   专辑：[http://www.**xiami.com/album/168931**](http://www.xiami.com/album/168931)
     *   精选集：[http://www.**xiami.com/collect/42563832**](http://www.xiami.com/collect/42563832)
-    *   DEMO：[http://i.xiami.com/zhangchao**/demo/1775392054**](http://i.xiami.com/zhangchao/demo/1775392054)
+    *   DEMO：[http://i.xiami.com/zhangchao **/demo/1775392054**](http://i.xiami.com/zhangchao/demo/1775392054)
     *   今日歌单（需要cookie）：[http://www.xiami.com/play?ids=**/song/playlist/id/1/type/9**](http://www.xiami.com/play?ids=/song/playlist/id/1/type/9)
 
     **QQ音乐：**
 
-    *   单曲：[https://**y.qq.com**/n/yqq**/song/004ZTgPR3p7ftT.html**](https://y.qq.com/n/yqq/song/004ZTgPR3p7ftT.html)
-    *   艺人：[https://**y.qq.com**/n/yqq**/singer/000GDDuQ3sGQiT.html**](https://y.qq.com/n/yqq/singer/000GDDuQ3sGQiT.html)
-    *   专辑：[https://**y.qq.com**/n/yqq**/album/000Nkr7111lq0q.html**](https://y.qq.com/n/yqq/album/000Nkr7111lq0q.html)
-    *   精选集：[https://**y.qq.com**/n/yqq**/playlist/9666360.html**](https://y.qq.com/n/yqq/playlist/9666360.html)
+    *   单曲：[https://**y.qq.com**/n/yqq **/song/004ZTgPR3p7ftT.html**](https://y.qq.com/n/yqq/song/004ZTgPR3p7ftT.html)
+    *   艺人：[https://**y.qq.com**/n/yqq **/singer/000GDDuQ3sGQiT.html**](https://y.qq.com/n/yqq/singer/000GDDuQ3sGQiT.html)
+    *   专辑：[https://**y.qq.com**/n/yqq **/album/000Nkr7111lq0q.html**](https://y.qq.com/n/yqq/album/000Nkr7111lq0q.html)
+    *   精选集：[https://**y.qq.com**/n/yqq **/playlist/9666360.html**](https://y.qq.com/n/yqq/playlist/9666360.html)
 
     **网易云音乐：**
 
