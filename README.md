@@ -34,4 +34,4 @@
     *   虾米今日歌单需要用户自己的 Cookie: member_auth 才能解析到，否则解析默认歌单。
     *   部分音乐没有提供高品质的，如DEMO等，虾米部分正版歌曲只能解析到试听30秒版本。
     *   本工具只用于学习交流，下载试听音乐，禁止用于商业用途！最后，请支持正版！
-4.  **GitHub项目地址：**[https://github.com/xyuanmu/parsexiami](https://github.com/xyuanmu/parsexiami)
+4.  **测试地址：**[http://yuanmu.mzzhost.com/xiami/](http://yuanmu.mzzhost.com/xiami/)
