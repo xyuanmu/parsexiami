@@ -19,9 +19,17 @@ class Get_Music{
 	private static $_PROXY = "";
 	private static $_REFERER_XIAMI = "http://www.xiami.com/";
 	private static $_REFERER_NETEASE = "http://music.163.com/";
-	private static $_USERAGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.30 Safari/537.36";
+	private static $_PUBKEY = "65537";
+	private static $_NONCE = "0CoJUm6Qyw8W8jud";
+	private static $_MODULUS = "157794750267131502212476817800345498121872783333389747424011531025366277535262539913701806290766479189477533597854989606803194253978660329941980786072432806427833685472618792592200595694346872951301770580765135349259590167490536138082469680638514416594216629258349130257685001248172188325316586707301643237607";
+	private static $_HEADER = array(
+		'X-Real-IP: 118.88.88.88',
+		'Accept-Language: zh-CN,zh;q=0.8,gl;q=0.6,zh-TW;q=0.4',
+		'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36'
+	);
 
-	public function curl_http($url, $useCookie, $referer=null){
+
+	public function curl_http($url, $useCookie, $referer=null, $get_header=null, $post=null){
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $url);
 		// Use Proxy for Overseas Host
@@ -36,9 +44,17 @@ class Get_Music{
 			curl_setopt($ch, CURLOPT_COOKIE, $cookie);
 		}
 		curl_setopt($ch, CURLOPT_REFERER, $referer);
-		curl_setopt($ch, CURLOPT_TIMEOUT_MS, 1000*10);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, self::$_HEADER);
+		curl_setopt($ch, CURLOPT_TIMEOUT_MS, 1000*5);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($ch, CURLOPT_USERAGENT, self::$_USERAGENT);
+		if ($get_header){
+			curl_setopt($ch, CURLOPT_HEADER, 1);
+			curl_setopt($ch, CURLOPT_NOBODY, 1);
+		}
+		if ($post){
+			curl_setopt($ch, CURLOPT_POST, 1);
+			curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
+		}
 		$result = curl_exec($ch);
 		$err = curl_errno($ch);
 		curl_close($ch);
@@ -149,25 +165,17 @@ class Get_Music{
 					$albumID = $cake["album"]["id"];
 					$artist = $cake["artists"][0]["name"];
 					$artistID = $cake["artists"][0]["id"];
-					// 测试音乐地址是否有效
-					$song_url = $cake["mp3Url"];
-					$headers = get_headers($song_url);
-					if (!strpos($headers[0], "OK") && !strpos($headers[0], "Moved")){
-						// 替换子域名解决失效地址
-						$song_url = str_replace("//m", "//p", $song_url);
-						$need_get = 1;
+					$song_url = self::netease_new_api($mid)['url'];
+					if (!is_string($song_url)) {
+						$data['info'] = '付费歌曲暂时无法解析！';
+						return $data;
 					}
-					$data["src"] = $hMusic = $song_url;
-					// 判断并获取高品质音乐
-					if (in_array("hMusic", $cake)){
-						$id = isset($cake["hMusic"]["dfsId_str"]) ? $cake["hMusic"]["dfsId_str"] : number_format($cake["hMusic"]["dfsId"], 0,'','');
-						$songUrl = explode("/", $hMusic);
-						$hMusic = "http://" . $songUrl[2] . "/" . $this->encrypted_id($id) . "/" . $id . ".mp3";
-					}
+					$data["src"] = $song_url;
 					$html = '<div class="info-item"><img src="'.$cake["album"]["picUrl"].'?param=100y100"><div><p>'.$artist.' - '.$name.'</p><strong>标题：</strong>'.$name.'</div><div><strong>艺人：</strong>'.self::_a($artist, $artistID, 'artist', 'ne').'</div>';
 					$html.= '<div><strong>专辑：</strong>'.self::_a($album, $albumID, 'album', 'ne').'</div>';
 					$html.= '<div><strong>歌词：</strong><a href="?nelyric='.$mid.'&title='.$artist.' - '.$name.'">'.$artist.' - '.$name.'.lrc(点击下载)</a></div>';
-					$html.= '<strong id="song">歌曲：</strong><div id="case"><label id="case-label"><input id="src" readonly onmouseover="this.select()" value="'.$hMusic.'"></label></div>';
+					$html.= isset($new_api) ? '<div><strong>版权音乐，暂时只能解析128kbps！</strong></div>' : '';
+					$html.= '<strong id="song">歌曲：</strong><div id="case"><label id="case-label"><input id="src" readonly onmouseover="this.select()" value="'.$song_url.'"></label></div>';
 					$html.= '<div class="close" title="关闭">×</div></div>';
 
 					$data['info'] = htmlspecialchars($html);
@@ -260,6 +268,7 @@ class Get_Music{
 		return $html;
 	}
 
+	// 虾米歌曲链接转换代码
 	private function xiami_location($str){
 		try{
 			$a1=(int)$str{0};
@@ -287,6 +296,7 @@ class Get_Music{
 		}
 	}
 
+	// 网易云音乐歌曲ID加密代码
 	private function encrypted_id($dfsid){
 		$key = '3go8&$8*3*3h0k(2)2';
 		$key_len = strlen($key);
@@ -298,7 +308,72 @@ class Get_Music{
 		return $code;
 	}
 
+	// 网易云音乐新API
+	private function netease_new_api($song_id, $bit_rate=320000){
+		$url = 'http://music.163.com/weapi/song/enhance/player/url?csrf_token=';
+		$data = "{'ids': [$song_id], 'br': $bit_rate, 'csrf_token': ''}";
+		$data = self::encrypted_request($data);
+		$result = json_decode($this->curl_http($url, 0, self::$_REFERER_NETEASE, 0, http_build_query($data)), true);
+		if (isset($result['data'][0])) return $result['data'][0];
+		return false;
+	}
+
+	// 网易云音乐 weapi 加密数据
+	public function encrypted_request($data){
+		$secKey = self::randString(16);
+		$encText = self::aesEncrypt( self::aesEncrypt($data, self::$_NONCE), $secKey );
+		$pow = self::bchexdec( bin2hex( strrev($secKey) ) );
+		$encKeyMod = bcpowmod($pow, self::$_PUBKEY, self::$_MODULUS);
+		$encSecKey = self::bcdechex($encKeyMod);
+		$data = array(
+			'params' => $encText,
+			'encSecKey' => $encSecKey
+		);
+		return $data;
+	}
+
+	// 生成16位随机字符串
+	private function randString($length){
+		$chars = 'abcdef0123456789';
+		$result = '';
+		$max = strlen($chars) - 1;
+		for ($i = 0; $i < $length; $i++){
+			$result .= $chars[rand(0, $max)];
+		}
+		return $result;
+	}
+
+	// AES 证书加密
+	private function aesEncrypt($data, $secKey){
+		$pad = 16 - strlen($data) % 16;
+		$data = $data . str_repeat(chr($pad), $pad);
+		$cip = mcrypt_encrypt(MCRYPT_RIJNDAEL_128, $secKey, $data, MCRYPT_MODE_CBC, "0102030405060708");
+		$cip = base64_encode($cip);
+		return $cip;
+	}
+
+	private function bcdechex($dec) {
+		$hex = '';
+		do {
+			$last = bcmod($dec, 16);
+			$hex = dechex($last).$hex;
+			$dec = bcdiv(bcsub($dec, $last), 16);
+		} while($dec>0);
+		return $hex;
+	}
+
+	private function bchexdec($hex) {
+		if(strlen($hex) == 1) {
+			return hexdec($hex);
+		} else {
+			$remain = substr($hex, 0, -1);
+			$last = substr($hex, -1);
+			return bcadd(bcmul(16, self::bchexdec($remain)), hexdec($last));
+		}
+	}
+
 }
+
 
 $get_music = new Get_Music;
 
@@ -343,7 +418,7 @@ if (isset($_POST["url"]) && $_POST["url"]){
 	elseif (preg_match('/y.qq.com/i', $url)){
 		$data['info'] = "(>_<)  QQ音乐解析暂不开源";
 	}
-	elseif (preg_match('/music.163.com/i', $url)){
+	elseif (preg_match('/music.163.com/i', $url) || preg_match('/igame.163.com/i', $url)){
 		if (preg_match('#/(\w+\?id=\d+)#i', $url, $matches)){
 			$data = array_merge($data, $get_music->get_netease($matches[1]));
 		}
@@ -389,7 +464,7 @@ if (isset($_GET["nelyric"]) && $_GET["nelyric"]):
 endif;
 
 if (isset($_GET["help"])):
-echo '<ol><li><p><strong>支持链接，加粗的是关键字：</strong></p><p><strong>虾米网：</strong></p><ul><li>单曲：<a href="javascript:void(0);" onclick="setinput(\'xiami.com/song/2085857\')">http://www.<strong>xiami.com/song/2085857</strong></a></li><li>艺人：<a href="javascript:void(0);" onclick="setinput(\'xiami.com/artist/23503\')">http://www.<strong>xiami.com/artist/23503</strong></a></li><li>专辑：<a href="javascript:void(0);" onclick="setinput(\'xiami.com/album/168931\')">http://www.<strong>xiami.com/album/168931</strong></a></li><li>精选集：<a href="javascript:void(0);" onclick="setinput(\'xiami.com/collect/42563832\')">http://www.<strong>xiami.com/collect/42563832</strong></a></li><li>DEMO：<a href="javascript:void(0);" onclick="setinput(\'/demo/1775392054\')">http://i.xiami.com/zhangchao<strong>/demo/1775392054</strong></a></li><li>今日歌单（需要cookie）：<a href="javascript:void(0);" onclick="setinput(\'/song/playlist/id/1/type/9\')">http://www.xiami.com/play?ids=<strong>/song/playlist/id/1/type/9</strong></a></li></ul><p><strong>QQ音乐：</strong></p><ul><li>单曲：<a href="javascript:void(0);" onclick="setinput(\'y.qq.com/song/004ZTgPR3p7ftT.html\')">https://<strong>y.qq.com</strong>/n/yqq<strong>/song/004ZTgPR3p7ftT.html</strong></a></li><li>艺人：<a href="javascript:void(0);" onclick="setinput(\'y.qq.com/singer/000GDDuQ3sGQiT.html\')">https://<strong>y.qq.com</strong>/n/yqq<strong>/singer/000GDDuQ3sGQiT.html</strong></a></li><li>专辑：<a href="javascript:void(0);" onclick="setinput(\'y.qq.com/album/000Nkr7111lq0q.html\')">https://<strong>y.qq.com</strong>/n/yqq<strong>/album/000Nkr7111lq0q.html</strong></a></li><li>精选集：<a href="javascript:void(0);" onclick="setinput(\'y.qq.com/playlist/9666360.html\')">https://<strong>y.qq.com</strong>/n/yqq<strong>/playlist/9666360.html</strong></a></li></ul><p><strong>网易云音乐：</strong></p><ul><li>单曲：<a href="javascript:void(0);" onclick="setinput(\'music.163.com/song?id=190449\')">http://<strong>music.163.com/#/song?id=190449</strong></a></li><li>艺人：<a href="javascript:void(0);" onclick="setinput(\'music.163.com/artist?id=6452\')">http://<strong>music.163.com/#/artist?id=6452</strong></a></li><li>专辑：<a href="javascript:void(0);" onclick="setinput(\'music.163.com/album?id=27483\')">http://<strong>music.163.com/#/album?id=27483</strong></a></li><li>精选集：<a href="javascript:void(0);" onclick="setinput(\'music.163.com/playlist?id=691394551\')">http://<strong>music.163.com/#/playlist?id=691394551</strong></a></li></ul></li><li><p><strong>高级选项：</strong></p><ul><li>此功能用于解析虾米音乐今日歌单（Cookie），或者国外服务器解析失败时使用（代理IP）。</li><li>在服务器使用：首先登录虾米，登录后获取 Cookie: member_auth（<a href="assets/Chrome-Cookie.gif">获取方法</a>），打开服务器虾米解析页面，点开高级选项，左边输入 member_auth，（可选，右边输入代理IP）进行解析。</li><li>在本地使用：本地搭建PHP环境（如：<a href="http://www.phpstudy.net/" target=_blank>phpStudy</a>），打开虾米解析页面，点开高级选项，输入 member_auth 并进行解析。</li><li>使用HTTP代理：如果服务器不在国内有可能会解析失败，在高级选项右边输入国内代理IP进行解析。</li></ul></li><li><p><strong>注意事项：</strong></p><ul><li>本工具有关虾米、网易云音乐的解析代码开源，QQ音乐因特殊原因不予开源，本人以人格保证此工具不会收集用户信息，若不放心可以不输入 Cookie，或者本地搭建使用。</li><li>虾米今日歌单需要用户自己的 Cookie: member_auth 才能解析到，否则解析默认歌单。</li><li>部分音乐没有提供高品质的，如DEMO等，虾米部分正版歌曲只能解析到试听30秒版本。</li><li>本工具只用于学习交流，下载试听音乐，禁止用于商业用途！最后，请支持正版！</li></ul></li><li><p><strong>GitHub项目地址：</strong><a href="https://github.com/xyuanmu/parsexiami" target=_blank>https://github.com/xyuanmu/parsexiami</a></p></li></ol>';
+echo '<ol><li><p><strong>支持链接，加粗的是关键字：</strong></p><p><strong>虾米网：</strong></p><ul><li>单曲：<a href="javascript:void(0);" onclick="setinput(\'xiami.com/song/2085857\')">http://www.<strong>xiami.com/song/2085857</strong></a></li><li>艺人：<a href="javascript:void(0);" onclick="setinput(\'xiami.com/artist/23503\')">http://www.<strong>xiami.com/artist/23503</strong></a></li><li>专辑：<a href="javascript:void(0);" onclick="setinput(\'xiami.com/album/168931\')">http://www.<strong>xiami.com/album/168931</strong></a></li><li>精选集：<a href="javascript:void(0);" onclick="setinput(\'xiami.com/collect/42563832\')">http://www.<strong>xiami.com/collect/42563832</strong></a></li><li>DEMO：<a href="javascript:void(0);" onclick="setinput(\'/demo/1775392054\')">http://i.xiami.com/zhangchao<strong>/demo/1775392054</strong></a></li><li>今日歌单（需要cookie）：<a href="javascript:void(0);" onclick="setinput(\'/song/playlist/id/1/type/9\')">http://www.xiami.com/play?ids=<strong>/song/playlist/id/1/type/9</strong></a></li></ul><p><strong>QQ音乐：</strong></p><ul><li>单曲：<a href="javascript:void(0);" onclick="setinput(\'y.qq.com/song/004ZTgPR3p7ftT.html\')">https://<strong>y.qq.com</strong>/n/yqq<strong>/song/004ZTgPR3p7ftT.html</strong></a></li><li>艺人：<a href="javascript:void(0);" onclick="setinput(\'y.qq.com/singer/000GDDuQ3sGQiT.html\')">https://<strong>y.qq.com</strong>/n/yqq<strong>/singer/000GDDuQ3sGQiT.html</strong></a></li><li>专辑：<a href="javascript:void(0);" onclick="setinput(\'y.qq.com/album/000Nkr7111lq0q.html\')">https://<strong>y.qq.com</strong>/n/yqq<strong>/album/000Nkr7111lq0q.html</strong></a></li><li>精选集：<a href="javascript:void(0);" onclick="setinput(\'y.qq.com/playlist/9666360.html\')">https://<strong>y.qq.com</strong>/n/yqq<strong>/playlist/9666360.html</strong></a></li></ul><p><strong>网易云音乐：</strong></p><ul><li>单曲：<a href="javascript:void(0);" onclick="setinput(\'music.163.com/song?id=190449\')">http://<strong>music.163.com/#/song?id=190449</strong></a></li><li>艺人：<a href="javascript:void(0);" onclick="setinput(\'music.163.com/artist?id=6452\')">http://<strong>music.163.com/#/artist?id=6452</strong></a></li><li>专辑：<a href="javascript:void(0);" onclick="setinput(\'music.163.com/album?id=27483\')">http://<strong>music.163.com/#/album?id=27483</strong></a></li><li>精选集：<a href="javascript:void(0);" onclick="setinput(\'music.163.com/playlist?id=691394551\')">http://<strong>music.163.com/#/playlist?id=691394551</strong></a></li></ul></li><li><p><strong>高级选项：</strong></p><ul><li>此功能用于解析虾米音乐今日歌单（Cookie），或者国外服务器解析失败时使用（代理IP）。</li><li>在服务器使用：首先登录虾米，登录后获取 Cookie: member_auth（<a href="assets/Chrome-Cookie.gif">获取方法</a>），打开服务器虾米解析页面，点开高级选项，左边输入 member_auth，（可选，右边输入代理IP）进行解析。</li><li>在本地使用：本地搭建PHP环境（如：<a href="http://www.phpstudy.net/" target=_blank>phpStudy</a>），打开虾米解析页面，点开高级选项，输入 member_auth 并进行解析。</li><li>使用HTTP代理：如果服务器不在国内有可能会解析失败，在高级选项右边输入国内代理IP进行解析。</li></ul></li><li><p><strong>注意事项：</strong></p><ul><li>本工具有关虾米、网易云音乐的解析代码开源，QQ音乐因特殊原因不予开源，本人以人格保证此工具不会收集用户信息，若不放心可以不输入 Cookie，或者本地搭建使用。</li><li>虾米今日歌单需要用户自己的 Cookie: member_auth 才能解析到，否则解析默认歌单。</li><li>部分音乐没有提供高品质的，如DEMO，网易云音乐版权歌曲等。虾米部分正版歌曲只能解析到试听30秒版本。</li><li>本工具只用于学习交流，下载试听音乐，禁止用于商业用途！最后，请支持正版！</li></ul></li><li><p><strong>GitHub项目地址：</strong><a href="https://github.com/xyuanmu/parsexiami" target=_blank>https://github.com/xyuanmu/parsexiami</a></p></li></ol>';
 ; else :
 ?>
 <!DOCTYPE html>
