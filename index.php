@@ -68,12 +68,16 @@ class Get_Music{
 	public function get_xiami($sid, $type){
 		if ($sid!=1){
 			$info = explode("/", $sid);
-			$sid = $info[1];
 			if (preg_match("/[a-zA-Z]/", $info[1])){
 				$url = "http://www.xiami.com/".$sid;
 				$pageindex = $this->curl_http($url, 0);
 				preg_match("#link rel=\"canonical\" href=\"http://www.xiami.com/\w+/(\d+)\"#", $pageindex, $matches);
-				if ($matches) $sid = $matches[1];
+				if ($matches){
+					$sid = $matches[1];
+				} else {
+					$data['info'] = '获取歌曲ID失败！';
+					return $data;
+				}
 			}
 		}
 		$url = 'http://www.xiami.com/song/playlist/id/'.$sid.'/type/'.$type;
