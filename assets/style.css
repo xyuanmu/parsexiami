@@ -5,6 +5,7 @@ a:active{color:#065177}
 h1{text-align:center}
 hr{border: 0;border-top: 1px solid #ddd;border-bottom: 1px solid #fff;margin: 10px 0!important}
 div{margin:3px 0}
+img{max-width:200px;}
 form{text-align:center;margin:30px 0 40px}
 ol{overflow:auto}
 ol li{list-style-type:decimal-leading-zero}

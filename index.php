@@ -78,6 +78,8 @@ class Get_Music{
 					$data['info'] = '获取歌曲ID失败！';
 					return $data;
 				}
+			} else {
+				$sid = $info[1];
 			}
 		}
 		$url = 'http://www.xiami.com/song/playlist/id/'.$sid.'/type/'.$type;
