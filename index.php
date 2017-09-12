@@ -433,9 +433,13 @@ class Get_Music{
 
 	// AES 证书加密
 	private function aesEncrypt($data, $secKey){
-		$pad = 16 - strlen($data) % 16;
-		$data = $data . str_repeat(chr($pad), $pad);
-		$cip = mcrypt_encrypt(MCRYPT_RIJNDAEL_128, $secKey, $data, MCRYPT_MODE_CBC, "0102030405060708");
+		if (function_exists('openssl_encrypt')) {
+			$cip = openssl_encrypt($data, 'aes-128-cbc', pack('H*', bin2hex($secKey)), OPENSSL_RAW_DATA, "0102030405060708");
+		} else {
+			$pad = 16 - strlen($data) % 16;
+			$data = $data . str_repeat(chr($pad), $pad);
+			$cip = mcrypt_encrypt(MCRYPT_RIJNDAEL_128, $secKey, $data, MCRYPT_MODE_CBC, "0102030405060708");
+		}
 		$cip = base64_encode($cip);
 		return $cip;
 	}
