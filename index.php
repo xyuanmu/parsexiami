@@ -89,19 +89,9 @@ class Get_Music{
 		}
 		$url = 'http://www.xiami.com/song/playlist/id/'.$sid.'/type/'.$type.'/cat/json';
 		$useCookie = $type==9 ? 1 : 0;
-		$result = json_decode($this->curl_http($url, $useCookie), true);
-
-
-
+		$result = json_decode($this->curl_http($url, $useCookie, self::$_REFERER_XIAMI), true);
 
 		if (isset($result["data"]["trackList"])){
-
-
-
-
-
-
-
 			$track = $result["data"]["trackList"];
 			$close = '<div class="close" title="关闭">×</div>';
 			$html = '<div class="info-item">';
@@ -125,33 +115,20 @@ class Get_Music{
 				$html.= '<img class="cover" src="'.$track["pic"].'"><div><strong>标题：</strong>'.$name.'</div><div><strong>艺人：</strong>'.$this->_a($artist, $track["artist_id"], 'artist').'</div>';
 				$html.= is_string($track["album_name"]) ? '<div><strong>专辑：</strong>'.$this->_a($track["album_name"], $track["album_id"], 'album').'</div>' : '';
 				$html.= is_string($track["lyric"]) ? '<div><strong>歌词：</strong><a href="?xmlyric='.$track["lyric"].'&title='.$title.'">'.$title.'.lrc(点击下载)</a></div>' : '';
-
 				$html.= '<strong>歌曲：</strong><a href="'.$data["src"].'" download="'.$title.'.mp3"></label>'.$title.'.mp3(点击下载)</a>';
 				$html.= $close.'</div>';
 			}
 			else {
 				$title = $type==3 ? '精选集曲目：' : '今日歌单曲目：';
-
 				if (isset($track[0])){
 					$html.= $type==1 ? '<img src="'.$track[0]["pic"].'"><div><strong>专辑：</strong>'.$track[0]["album_name"].'</div><div><strong>艺人：</strong>'.$this->_a($track[0]["artist"], $track[0]["artist_id"], 'artist') : '';
 					$html.= $type==2 ? '<div><strong>'.$track[0]["artist"].'的热门曲目：</strong>' : '';
-
-
-
 				}
 				$html.= $type==3 || $type==9 ? '<div><strong>'.$title.'</strong>' : '';
 				$html.= '</div><ol>';
-
 				foreach ($track as $item){
 					$html.= '<li>'.$this->_a($item["songName"], $item["song_id"], 'song');
 					$html.= $type==3 || $type==9 ? ' - '.$this->_a($item["artist"], $item["artist_id"], 'artist') : '';
-
-
-
-
-
-
-
 					if ($type!=1)
 						$html.= ' - 《'.$this->_a($item["album_name"], $item["album_id"], 'album').'》';
 					$html.= '</li>';
@@ -195,7 +172,6 @@ class Get_Music{
 					$html = '<div class="info-item"><img class="cover" src="'.$cake["album"]["picUrl"].'?param=100y100"><div><strong>标题：</strong>'.$name.'</div><div><strong>艺人：</strong>'.$this->_a($artist, $artistID, 'artist', 'ne').'</div>';
 					$html.= '<div><strong>专辑：</strong>'.$this->_a($album, $albumID, 'album', 'ne').'</div>';
 					$html.= '<div><strong>歌词：</strong><a href="?nelyric='.$mid.'&title='.$title.'">'.$title.'.lrc(点击下载)</a></div>';
-
 					$html.= '<strong>歌曲('.$song_bit.'Kbps)：</strong><a href="'.$song_url.'" download="'.$title.'.mp3">'.$title.'.mp3(点击下载)</a>';
 					$html.= $close.'</div>';
 
@@ -206,6 +182,7 @@ class Get_Music{
 				}
 				return $data;
 			break;
+
 			case "album":
 				$url = "http://music.163.com/api/album/".$mid;
 				$result = json_decode($this->curl_http($url, 0, self::$_REFERER_NETEASE), true);
