@@ -1,3 +1,5 @@
+# 此项目不再维护，请体验新版音乐盒 [MusicBox](http://yuanmu.mzzhost.com/musicbox.html)
+
 1.  **支持链接，加粗的是关键字：**
 
     **虾米网：**
@@ -34,6 +36,6 @@
     *   虾米今日歌单需要用户自己的 Cookie: member_auth 才能解析到，否则解析默认歌单。
     *   部分音乐没有提供高品质的，如DEMO，网易云音乐版权歌曲等。虾米部分正版歌曲只能解析到试听30秒版本。
     *   本工具只用于学习交流，下载试听音乐，禁止用于商业用途！最后，请支持正版！
-4.  **测试地址：**[http://yuanmu.mzzhost.com/xiami/](http://yuanmu.mzzhost.com/xiami/)
+4.  ~~**测试地址：**[http://yuanmu.mzzhost.com/xiami/](http://yuanmu.mzzhost.com/xiami/)~~
 
 5. **现已支持搜索！** 方法：输入两个等号再加内容，如：==月牙湾
